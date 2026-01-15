@@ -140,7 +140,8 @@
             font-size: 32px;
             color: white;
             font-weight: bold;
-            background-image: url('https://github.com/lazarevicboki-oss/NTC4MEMORY/raw/main/NTCapp/NTCback.png');
+            /* OVDE: koristi lokalni fajl u istom folderu kao index.html */
+            background-image: url('./NTCback.png');
             background-size: cover;
             background-position: center;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
@@ -335,7 +336,8 @@
     </div>
 
     <script>
-        const baseGit = "https://github.com/lazarevicboki-oss/NTC4MEMORY/raw/main/NTCapp/";
+        // OVDE: sada koristimo fajlove iz istog foldera gde je index.html
+        const baseGit = "./";
 
         const cardImages = {
             // Row 1: Mass
@@ -540,7 +542,7 @@
                 }
             } else {
                 gameState.gameActive = false;
-                showMessage(`❌ Nisu parovi - Red je ${gameState.currentPlayer === 1 ? 'Igrača 2' : 'Igrača 1'}!`, true);
+                showMessage(`❌ Nisu parovi - Red je ${gameState.currentPlayer === 1 ? 'Igrača 2' : 'Igrač 1'}!`, true);
                 setTimeout(() => {
                     gameState.flipped = [];
                     gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
