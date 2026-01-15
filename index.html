@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,12 +32,13 @@
             transition: background-color 0.5s ease;
         }
 
+        /* Jarke boje po igraču */
         body.player1-bg {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            background: linear-gradient(135deg, #2196f3 0%, #64b5f6 100%);
         }
 
         body.player2-bg {
-            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            background: linear-gradient(135deg, #ff5252 0%, #ff8a80 100%);
         }
 
         .container {
@@ -140,7 +141,7 @@
             font-size: 32px;
             color: white;
             font-weight: bold;
-            /* OVDE: koristi lokalni fajl u istom folderu kao index.html */
+            /* lokalna slika u istom folderu kao index.html */
             background-image: url('./NTCback.png');
             background-size: cover;
             background-position: center;
@@ -293,7 +294,7 @@
         }
     </style>
 </head>
-<body>
+<body class="player1-bg">
     <div class="container">
         <div class="header">
             <h1>⚛️ SI Jedinice Memorijska Igra</h1>
@@ -318,7 +319,8 @@
             <div class="stat">Igrač 1 Upari: <span class="stat-value" id="p1Matches">0</span></div>
             <div class="stat">Igrač 2 Upari: <span class="stat-value" id="p2Matches">0</span></div>
             <div class="stat">Trenutno: <span class="stat-value" id="currentPlayer">Igrač 1</span></div>
-            <div class="stat">Vreme: <span class="stat-value" id="timer">0s</span></div>
+            <div class="stat">Vreme Igrač 1: <span class="stat-value" id="p1Time">0s</span></div>
+            <div class="stat">Vreme Igrač 2: <span class="stat-value" id="p2Time">0s</span></div>
         </div>
 
         <div class="message" id="message"></div>
@@ -336,7 +338,7 @@
     </div>
 
     <script>
-        // OVDE: sada koristimo fajlove iz istog foldera gde je index.html
+        // slike su u istom folderu kao index.html
         const baseGit = "./";
 
         const cardImages = {
@@ -426,7 +428,9 @@
             startTime: null,
             gameActive: true,
             flipsToMatch: 2,
-            selectedRow: 0
+            selectedRow: 0,
+            p1Time: 0,
+            p2Time: 0
         };
 
         function setDifficulty(ev, level, flips) {
@@ -462,6 +466,8 @@
             gameState.p2Matches = 0;
             gameState.gameActive = true;
             gameState.startTime = Date.now();
+            gameState.p1Time = 0;
+            gameState.p2Time = 0;
 
             renderBoard();
             updateStats();
@@ -542,7 +548,8 @@
                 }
             } else {
                 gameState.gameActive = false;
-                showMessage(`❌ Nisu parovi - Red je ${gameState.currentPlayer === 1 ? 'Igrača 2' : 'Igrač 1'}!`, true);
+                // novi tekst za pogrešan par
+                showMessage(`❌ Par nije pogođen - Red je na Igrača ${gameState.currentPlayer === 1 ? '2' : '1'}!`, true);
                 setTimeout(() => {
                     gameState.flipped = [];
                     gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
@@ -558,7 +565,7 @@
             document.getElementById('p2Matches').textContent = gameState.p2Matches;
             const currentPlayerEl = document.getElementById('currentPlayer');
             currentPlayerEl.textContent = `Igrač ${gameState.currentPlayer}`;
-            currentPlayerEl.className = gameState.currentPlayer === 1 ? 'stat-value player1-color' : 'stat-value player2-color';
+            currentPlayerEl.className = 'stat-value';
 
             document.body.classList.remove('player1-bg', 'player2-bg');
             if (gameState.currentPlayer === 1) {
@@ -566,14 +573,20 @@
             } else {
                 document.body.classList.add('player2-bg');
             }
+
+            // vreme se već osvežava u startTimer, ovde ne moramo ništa
         }
 
         function startTimer() {
             if (gameState._timer) return;
             gameState._timer = setInterval(() => {
-                if (gameState.startTime) {
-                    const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
-                    document.getElementById('timer').textContent = elapsed + 's';
+                if (!gameState.gameActive) return;
+                if (gameState.currentPlayer === 1) {
+                    gameState.p1Time++;
+                    document.getElementById('p1Time').textContent = gameState.p1Time + 's';
+                } else {
+                    gameState.p2Time++;
+                    document.getElementById('p2Time').textContent = gameState.p2Time + 's';
                 }
             }, 1000);
         }
@@ -592,11 +605,10 @@
 
         function endGame() {
             gameState.gameActive = false;
-            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
             const winner = gameState.p1Matches > gameState.p2Matches ? 'Igrač 1'
                 : gameState.p2Matches > gameState.p1Matches ? 'Igrač 2'
                 : 'Nerešeno';
-            showMessage(`🎉 Igra Završena! Pobednik: ${winner} (I1: ${gameState.p1Matches} - I2: ${gameState.p2Matches}) - ${elapsed}s`, false);
+            showMessage(`🎉 Igra Završena! Pobednik: ${winner} (I1: ${gameState.p1Matches} - I2: ${gameState.p2Matches})`, false);
         }
 
         function resetGame() {
