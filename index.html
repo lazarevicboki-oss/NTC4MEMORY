@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SI Units Memory Game</title>
+    <style>
+        :root {
+            --color-primary: #2180a1;
+            --color-primary-hover: #1a6585;
+            --color-background: #fcfcf9;
+            --color-surface: #ffffff;
+            --color-text: #134252;
+            --color-text-secondary: #626c71;
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-success: #218089;
+            --color-error: #c0152f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-background);
+            color: var(--color-text);
+            padding: 20px;
+            min-height: 100vh;
+            transition: background-color 0.5s ease;
+        }
+
+        body.player1-bg {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+
+        body.player2-bg {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: var(--color-text);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+        }
+
+        .stat-value {
+            color: var(--color-primary);
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .card {
+            width: 100%;
+            aspect-ratio: 1;
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--color-text);
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background-size: 400% 700%;
+            background-repeat: no-repeat;
+        }
+
+        .card:hover:not(.matched):not(.flipped) {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .card.flipped {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .card.matched {
+            background-color: rgba(33, 128, 137, 0.1);
+            border-color: var(--color-success);
+            cursor: default;
+            opacity: 0.6;
+        }
+
+        .card.error {
+            animation: shake 0.4s;
+        }
+
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--color-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: bold;
+            background-image: url('https://github.com/lazarevicboki-oss/NTC4MEMORY/raw/main/NTCapp/NTCback.png');
+            background-size: cover;
+            background-position: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .card.flipped .card-back,
+        .card.matched .card-back {
+            display: none;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--color-border);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(94, 82, 64, 0.3);
+        }
+
+        .message {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            min-height: 30px;
+            color: var(--color-success);
+        }
+
+        .message.error {
+            color: var(--color-error);
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            border: 2px solid var(--color-border);
+            border-radius: 6px;
+            cursor: pointer;
+            background: var(--color-surface);
+            color: var(--color-text);
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .difficulty-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .difficulty-btn:hover {
+            border-color: var(--color-primary);
+        }
+
+        .row-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .row-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            cursor: pointer;
+            background: var(--color-surface);
+            color: var(--color-text);
+            transition: all 0.2s ease;
+            font-weight: 400;
+        }
+
+        .row-btn.active {
+            background: rgba(33, 128, 137, 0.2);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .row-btn:hover {
+            border-color: var(--color-primary);
+        }
+
+        .info {
+            background: rgba(33, 128, 137, 0.08);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .stats {
+                gap: 15px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚛️ SI Jedinice Memorijska Igra</h1>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn active" onclick="setDifficulty(event, 'hard', 2)">Upari 2 Kartice</button>
+                <button class="difficulty-btn" onclick="setDifficulty(event, 'hard', 3)">Upari 3 Kartice</button>
+                <button class="difficulty-btn" onclick="setDifficulty(event, 'hard', 4)">Upari 4 Kartice</button>
+            </div>
+            <div class="row-buttons">
+                <button class="row-btn active" onclick="filterByRow(event, 0)">Sve Vrste</button>
+                <button class="row-btn" onclick="filterByRow(event, 1)">Vrsta 1: Masa</button>
+                <button class="row-btn" onclick="filterByRow(event, 2)">Vrsta 2: Dužina</button>
+                <button class="row-btn" onclick="filterByRow(event, 3)">Vrsta 3: Struja</button>
+                <button class="row-btn" onclick="filterByRow(event, 4)">Vrsta 4: Vreme</button>
+                <button class="row-btn" onclick="filterByRow(event, 5)">Vrsta 5: Temperatura</button>
+                <button class="row-btn" onclick="filterByRow(event, 6)">Vrsta 6: Količina</button>
+                <button class="row-btn" onclick="filterByRow(event, 7)">Vrsta 7: Svetlost</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">Igrač 1 Upari: <span class="stat-value" id="p1Matches">0</span></div>
+            <div class="stat">Igrač 2 Upari: <span class="stat-value" id="p2Matches">0</span></div>
+            <div class="stat">Trenutno: <span class="stat-value" id="currentPlayer">Igrač 1</span></div>
+            <div class="stat">Vreme: <span class="stat-value" id="timer">0s</span></div>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="resetGame()">Nova Igra</button>
+            <button class="btn btn-secondary" onclick="toggleHint()">Prikaži Kartice</button>
+        </div>
+
+        <div class="game-board" id="gameBoard"></div>
+
+        <div class="info">
+            Upari kartice iz iste SI vrste. Odaberi 2, 3 ili 4 kartice odjednom. Sve kartice koriste slike iz tvog GitHub repozitorijuma!
+        </div>
+    </div>
+
+    <script>
+        const baseGit = "https://github.com/lazarevicboki-oss/NTC4MEMORY/raw/main/NTCapp/";
+
+        const cardImages = {
+            // Row 1: Mass
+            'm': baseGit + "m.png",
+            'kg': baseGit + "kg.png",
+            'sumo': baseGit + "sumo.png",
+            'mal': baseGit + "teg.png",
+            // Row 2: Length
+            'l': baseGit + "l.png",
+            'meter': baseGit + "meter.png",
+            'road': baseGit + "road.png",
+            'mtape': baseGit + "mtape.png",
+            // Row 3: Current
+            'I': baseGit + "I.png",
+            'A': baseGit + "A.png",
+            'struja': baseGit + "struja.png",
+            'AA': baseGit + "AA.png",
+            // Row 4: Time
+            't': baseGit + "t.png",
+            's': baseGit + "s.png",
+            'sat': baseGit + "sat.png",
+            'satp': baseGit + "satp.png",
+            // Row 5: Temperature
+            'T': baseGit + "T1.png",
+            'K': baseGit + "K.png",
+            'temp1': baseGit + "temp1.png",
+            'temp2': baseGit + "temp2.png",
+            // Row 6: Amount of Substance
+            'n': baseGit + "n.png",
+            'mal2': baseGit + "mal.png",
+            'atom': baseGit + "atom.png",
+            'elenmajer': baseGit + "elenmajer.png",
+            // Row 7: Luminous Intensity
+            'J': baseGit + "J.png",
+            'cd': baseGit + "cd.png",
+            'candel': baseGit + "candel.png",
+            'lamp': baseGit + "lamp.png"
+        };
+
+        const cards = [
+            // Row 1: Mass
+            { name: 'm', group: 'mass', row: 1, imageKey: 'm' },
+            { name: '[kg]', group: 'mass', row: 1, imageKey: 'kg' },
+            { name: 'Sumo', group: 'mass', row: 1, imageKey: 'sumo' },
+            { name: 'Mal', group: 'mass', row: 1, imageKey: 'mal' },
+            // Row 2: Length
+            { name: 'l', group: 'length', row: 2, imageKey: 'l' },
+            { name: '[m]', group: 'length', row: 2, imageKey: 'meter' },
+            { name: 'Road', group: 'length', row: 2, imageKey: 'road' },
+            { name: 'M-Tape', group: 'length', row: 2, imageKey: 'mtape' },
+            // Row 3: Current
+            { name: 'I', group: 'current', row: 3, imageKey: 'I' },
+            { name: '[A]', group: 'current', row: 3, imageKey: 'A' },
+            { name: 'Struja', group: 'current', row: 3, imageKey: 'struja' },
+            { name: 'AA', group: 'current', row: 3, imageKey: 'AA' },
+            // Row 4: Time
+            { name: 't', group: 'time', row: 4, imageKey: 't' },
+            { name: '[s]', group: 'time', row: 4, imageKey: 's' },
+            { name: 'SAT', group: 'time', row: 4, imageKey: 'sat' },
+            { name: 'SAT-P', group: 'time', row: 4, imageKey: 'satp' },
+            // Row 5: Temperature
+            { name: 'T', group: 'temperature', row: 5, imageKey: 'T' },
+            { name: '[K]', group: 'temperature', row: 5, imageKey: 'K' },
+            { name: 'Temp1', group: 'temperature', row: 5, imageKey: 'temp1' },
+            { name: 'Temp2', group: 'temperature', row: 5, imageKey: 'temp2' },
+            // Row 6: Amount of Substance
+            { name: 'n', group: 'amount', row: 6, imageKey: 'n' },
+            { name: '[mol]', group: 'amount', row: 6, imageKey: 'mal2' },
+            { name: 'Atom', group: 'amount', row: 6, imageKey: 'atom' },
+            { name: 'Elenmajer', group: 'amount', row: 6, imageKey: 'elenmajer' },
+            // Row 7: Luminous Intensity
+            { name: 'J', group: 'luminosity', row: 7, imageKey: 'J' },
+            { name: '[cd]', group: 'luminosity', row: 7, imageKey: 'cd' },
+            { name: 'Candel', group: 'luminosity', row: 7, imageKey: 'candel' },
+            { name: 'Lamp', group: 'luminosity', row: 7, imageKey: 'lamp' }
+        ];
+
+        let gameState = {
+            cards: [],
+            flipped: [],
+            matched: [],
+            moves: 0,
+            p1Matches: 0,
+            p2Matches: 0,
+            currentPlayer: 1,
+            startTime: null,
+            gameActive: true,
+            flipsToMatch: 2,
+            selectedRow: 0
+        };
+
+        function setDifficulty(ev, level, flips) {
+            gameState.flipsToMatch = flips || 2;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+            ev.target.classList.add('active');
+            resetGame();
+        }
+
+        function filterByRow(ev, rowNum) {
+            gameState.selectedRow = rowNum;
+            document.querySelectorAll('.row-btn').forEach(btn => btn.classList.remove('active'));
+            ev.target.classList.add('active');
+            resetGame();
+        }
+
+        function initializeGame() {
+            let gameCards = cards;
+            if (gameState.selectedRow > 0) {
+                gameCards = cards.filter(c => c.row === gameState.selectedRow);
+            }
+
+            gameState.cards = gameCards.map(card => ({
+                ...card,
+                id: Math.random()
+            }));
+
+            gameState.cards.sort(() => Math.random() - 0.5);
+            gameState.flipped = [];
+            gameState.matched = [];
+            gameState.moves = 0;
+            gameState.p1Matches = 0;
+            gameState.p2Matches = 0;
+            gameState.gameActive = true;
+            gameState.startTime = Date.now();
+
+            renderBoard();
+            updateStats();
+            clearMessage();
+            startTimer();
+
+            document.body.classList.remove('player1-bg', 'player2-bg');
+            document.body.classList.add('player1-bg');
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+
+            gameState.cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                cardEl.onclick = () => flipCard(index);
+
+                if (gameState.matched.includes(index)) {
+                    cardEl.classList.add('matched');
+                    const img = document.createElement('img');
+                    img.src = cardImages[card.imageKey];
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    cardEl.appendChild(img);
+                } else if (gameState.flipped.includes(index)) {
+                    cardEl.classList.add('flipped');
+                    const img = document.createElement('img');
+                    img.src = cardImages[card.imageKey];
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    cardEl.appendChild(img);
+                } else {
+                    cardEl.innerHTML = '<div class="card-back"></div>';
+                }
+
+                board.appendChild(cardEl);
+            });
+        }
+
+        function flipCard(index) {
+            if (!gameState.gameActive || gameState.flipped.includes(index) || gameState.matched.includes(index)) {
+                return;
+            }
+
+            gameState.flipped.push(index);
+            renderBoard();
+
+            if (gameState.flipped.length === gameState.flipsToMatch) {
+                gameState.moves++;
+                updateStats();
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const groups = gameState.flipped.map(idx => gameState.cards[idx].group);
+            const firstGroup = groups[0];
+            const allMatch = groups.every(g => g === firstGroup);
+
+            if (allMatch) {
+                gameState.matched.push(...gameState.flipped);
+                if (gameState.currentPlayer === 1) {
+                    gameState.p1Matches++;
+                } else {
+                    gameState.p2Matches++;
+                }
+                updateStats();
+                showMessage(`✨ Par pronađen! ${gameState.cards[gameState.flipped[0]].group.toUpperCase()} - ${gameState.currentPlayer === 1 ? 'Igrač 1' : 'Igrač 2'} dobija poen!`, false);
+                gameState.flipped = [];
+                renderBoard();
+
+                if (gameState.matched.length === gameState.cards.length) {
+                    endGame();
+                }
+            } else {
+                gameState.gameActive = false;
+                showMessage(`❌ Nisu parovi - Red je ${gameState.currentPlayer === 1 ? 'Igrača 2' : 'Igrača 1'}!`, true);
+                setTimeout(() => {
+                    gameState.flipped = [];
+                    gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+                    gameState.gameActive = true;
+                    updateStats();
+                    renderBoard();
+                }, 1200);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('p1Matches').textContent = gameState.p1Matches;
+            document.getElementById('p2Matches').textContent = gameState.p2Matches;
+            const currentPlayerEl = document.getElementById('currentPlayer');
+            currentPlayerEl.textContent = `Igrač ${gameState.currentPlayer}`;
+            currentPlayerEl.className = gameState.currentPlayer === 1 ? 'stat-value player1-color' : 'stat-value player2-color';
+
+            document.body.classList.remove('player1-bg', 'player2-bg');
+            if (gameState.currentPlayer === 1) {
+                document.body.classList.add('player1-bg');
+            } else {
+                document.body.classList.add('player2-bg');
+            }
+        }
+
+        function startTimer() {
+            if (gameState._timer) return;
+            gameState._timer = setInterval(() => {
+                if (gameState.startTime) {
+                    const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+                    document.getElementById('timer').textContent = elapsed + 's';
+                }
+            }, 1000);
+        }
+
+        function showMessage(text, isError) {
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = text;
+            msgEl.classList.toggle('error', isError);
+        }
+
+        function clearMessage() {
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = '';
+            msgEl.classList.remove('error');
+        }
+
+        function endGame() {
+            gameState.gameActive = false;
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const winner = gameState.p1Matches > gameState.p2Matches ? 'Igrač 1'
+                : gameState.p2Matches > gameState.p1Matches ? 'Igrač 2'
+                : 'Nerešeno';
+            showMessage(`🎉 Igra Završena! Pobednik: ${winner} (I1: ${gameState.p1Matches} - I2: ${gameState.p2Matches}) - ${elapsed}s`, false);
+        }
+
+        function resetGame() {
+            gameState.startTime = null;
+            if (gameState._timer) {
+                clearInterval(gameState._timer);
+                gameState._timer = null;
+            }
+            initializeGame();
+        }
+
+        function toggleHint() {
+            gameState.cards.forEach((card, index) => {
+                if (!gameState.matched.includes(index)) {
+                    if (!gameState.flipped.includes(index)) {
+                        gameState.flipped.push(index);
+                    }
+                }
+            });
+            renderBoard();
+            setTimeout(() => {
+                gameState.flipped = gameState.matched.slice();
+                renderBoard();
+            }, 2000);
+        }
+
+        initializeGame();
+    </script>
+</body>
+</html>
