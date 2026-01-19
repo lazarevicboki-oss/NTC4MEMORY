@@ -113,21 +113,29 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            color: white;
-            font-weight: bold;
             background-image: url('https://raw.githubusercontent.com/lazarevicboki-oss/NTC4MEMORY/main/Background.png');
-            background-size: cover;
+            background-size: 95% 95%;
             background-position: center;
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+            background-repeat: no-repeat;
         }
 
         .card.flipped .card-back,
         .card.matched .card-back { display: none !important; }
 
+        .card-front {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+        }
+
         .card-front img {
             width: 95%;
             height: 95%;
+            max-width: 95%;
+            max-height: 95%;
             object-fit: contain;
             border-radius: 10px;
         }
@@ -156,11 +164,7 @@
             font-weight: 600;
         }
 
-        .btn-primary {
-            background: var(--color-primary);
-            color: white;
-        }
-
+        .btn-primary { background: var(--color-primary); color: white; }
         .btn-primary:hover { 
             background: var(--color-primary-hover);
             transform: translateY(-3px);
@@ -223,34 +227,6 @@
             transform: translateY(-2px);
         }
 
-        .row-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .row-btn {
-            padding: 8px 12px;
-            font-size: 12px;
-            border: 2px solid var(--color-border);
-            border-radius: 6px;
-            cursor: pointer;
-            background: var(--color-surface);
-            color: var(--color-text);
-            transition: all 0.2s ease;
-            font-weight: 500;
-        }
-
-        .row-btn.active {
-            background: rgba(33, 128, 137, 0.3);
-            border-color: var(--color-primary);
-            color: var(--color-primary);
-        }
-
-        .row-btn:hover { border-color: var(--color-primary); transform: scale(1.05); }
-
         .info {
             background: rgba(33, 128, 137, 0.1);
             padding: 15px;
@@ -267,8 +243,6 @@
             .stats { gap: 15px; flex-direction: column; align-items: center; }
             .stat { font-size: 16px; }
             .stat-value { font-size: 20px; }
-            .row-buttons { gap: 4px; }
-            .row-btn { font-size: 10px; padding: 6px 8px; }
         }
     </style>
 </head>
@@ -280,16 +254,6 @@
                 <button class="difficulty-btn active" onclick="setDifficulty(event, 2)">🧩 2 Kartice</button>
                 <button class="difficulty-btn" onclick="setDifficulty(event, 3)">🔥 3 Kartice</button>
                 <button class="difficulty-btn" onclick="setDifficulty(event, 4)">💎 4 Kartice</button>
-            </div>
-            <div class="row-buttons">
-                <button class="row-btn active" onclick="filterByRow(event, 0)">🎮 Sve (28)</button>
-                <button class="row-btn" onclick="filterByRow(event, 1)">⚖️ Masa</button>
-                <button class="row-btn" onclick="filterByRow(event, 2)">📏 Dužina</button>
-                <button class="row-btn" onclick="filterByRow(event, 3)">⚡ Struja</button>
-                <button class="row-btn" onclick="filterByRow(event, 4)">⏰ Vreme</button>
-                <button class="row-btn" onclick="filterByRow(event, 5)">🌡️ Temp</button>
-                <button class="row-btn" onclick="filterByRow(event, 6)">🧪 Mol</button>
-                <button class="row-btn" onclick="filterByRow(event, 7)">💡 Svjetlost</button>
             </div>
         </div>
 
@@ -321,51 +285,50 @@
         <div class="game-board" id="gameBoard"></div>
 
         <div class="info">
-            🧠 28 unikatan kartica u 7 SI baza | Automatsko kreiranje upara | 
-            ⏱️ Vremensko praćenje po igraču | 🎨 Responsive dizajn
+            🧠 **28 kartica spremnih** | ⏱️ Vremensko praćenje | 
+            🎯 Automatski upari | 👆 Klikni za okretanje
         </div>
     </div>
 
     <script>
         const baseGit = 'https://raw.githubusercontent.com/lazarevicboki-oss/NTC4MEMORY/main/';
 
-        // SVE 28 KARATICA - provjereno da postoje u repozitoriju
         const allCards = [
             // MASA (4)
-            { group: 'mass', row: 1, imageKey: 'm.png' },
-            { group: 'mass', row: 1, imageKey: 'kg.png' },
-            { group: 'mass', row: 1, imageKey: 'sumo.png' },
-            { group: 'mass', row: 1, imageKey: 'teg.png' },
+            { group: 'mass', imageKey: 'm.png' },
+            { group: 'mass', imageKey: 'kg.png' },
+            { group: 'mass', imageKey: 'sumo.png' },
+            { group: 'mass', imageKey: 'teg.png' },
             // DUŽINA (4)
-            { group: 'length', row: 2, imageKey: 'l.png' },
-            { group: 'length', row: 2, imageKey: 'meter.png' },
-            { group: 'length', row: 2, imageKey: 'road.png' },
-            { group: 'length', row: 2, imageKey: 'mtape.png' },
+            { group: 'length', imageKey: 'l.png' },
+            { group: 'length', imageKey: 'meter.png' },
+            { group: 'length', imageKey: 'road.png' },
+            { group: 'length', imageKey: 'mtape.png' },
             // STRUJA (4)
-            { group: 'current', row: 3, imageKey: 'I.png' },
-            { group: 'current', row: 3, imageKey: 'A.png' },
-            { group: 'current', row: 3, imageKey: 'struja.png' },
-            { group: 'current', row: 3, imageKey: 'AA.png' },
+            { group: 'current', imageKey: 'I.png' },
+            { group: 'current', imageKey: 'A.png' },
+            { group: 'current', imageKey: 'struja.png' },
+            { group: 'current', imageKey: 'AA.png' },
             // VREME (4)
-            { group: 'time', row: 4, imageKey: 't.png' },
-            { group: 'time', row: 4, imageKey: 's.png' },
-            { group: 'time', row: 4, imageKey: 'sat.png' },
-            { group: 'time', row: 4, imageKey: 'satp.png' },
+            { group: 'time', imageKey: 't.png' },
+            { group: 'time', imageKey: 's.png' },
+            { group: 'time', imageKey: 'sat.png' },
+            { group: 'time', imageKey: 'satp.png' },
             // TEMPERATURA (4)
-            { group: 'temp', row: 5, imageKey: 'T1.png' },
-            { group: 'temp', row: 5, imageKey: 'K.png' },
-            { group: 'temp', row: 5, imageKey: 'temp1.png' },
-            { group: 'temp', row: 5, imageKey: 'temp2.png' },
+            { group: 'temp', imageKey: 'T1.png' },
+            { group: 'temp', imageKey: 'K.png' },
+            { group: 'temp', imageKey: 'temp1.png' },
+            { group: 'temp', imageKey: 'temp2.png' },
             // MOL (4)
-            { group: 'mol', row: 6, imageKey: 'n.png' },
-            { group: 'mol', row: 6, imageKey: 'mal.png' },
-            { group: 'mol', row: 6, imageKey: 'atom.png' },
-            { group: 'mol', row: 6, imageKey: 'elenmajer.png' },
+            { group: 'mol', imageKey: 'n.png' },
+            { group: 'mol', imageKey: 'mal.png' },
+            { group: 'mol', imageKey: 'atom.png' },
+            { group: 'mol', imageKey: 'elenmajer.png' },
             // SVJETLOST (4)
-            { group: 'light', row: 7, imageKey: 'J.png' },
-            { group: 'light', row: 7, imageKey: 'cd.png' },
-            { group: 'light', row: 7, imageKey: 'candel.png' },
-            { group: 'light', row: 7, imageKey: 'lamp.png' }
+            { group: 'light', imageKey: 'J.png' },
+            { group: 'light', imageKey: 'cd.png' },
+            { group: 'light', imageKey: 'candel.png' },
+            { group: 'light', imageKey: 'lamp.png' }
         ];
 
         let gameState = {
@@ -374,16 +337,13 @@
             currentPlayer: 1,
             gameActive: true,
             difficulty: 2,
-            selectedRow: 0,
             matchedCards: new Set(),
             gameStartTime: 0,
-            playerStartTimes: { p1: 0, p2: 0 },
-            playerTimers: { p1: 0, p2: 0 },
-            gameTimer: null,
-            playerTimersInterval: null
+            playerStartTimes: { p1: 0, p2: 0 }
         };
 
         let currentGameCards = [];
+        let gameTimer = null;
 
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -394,13 +354,11 @@
         function updateTimers() {
             const now = Date.now();
             
-            // Ukupno vrijeme igre
             if (gameState.gameStartTime > 0) {
-                const totalElapsed = Math.floor((now - gameState.gameStartTime) / 1000);
-                document.getElementById('totalTime').textContent = formatTime(totalElapsed);
+                const total = Math.floor((now - gameState.gameStartTime) / 1000);
+                document.getElementById('totalTime').textContent = formatTime(total);
             }
             
-            // Vrijeme po igraču
             ['p1', 'p2'].forEach(p => {
                 if (gameState.playerStartTimes[p] > 0) {
                     const elapsed = Math.floor((now - gameState.playerStartTimes[p]) / 1000);
@@ -409,24 +367,14 @@
             });
         }
 
-        function startGameTimer() {
-            if (!gameState.gameTimer) {
-                gameState.gameStartTime = Date.now();
-                gameState.gameTimer = setInterval(updateTimers, 1000);
-            }
-        }
-
-        function startPlayerTimer() {
-            const player = `p${gameState.currentPlayer}`;
-            if (gameState.playerStartTimes[player] === 0) {
-                gameState.playerStartTimes[player] = Date.now();
-            }
+        function startTimers() {
+            gameState.gameStartTime = Date.now();
+            gameState.playerStartTimes[`p${gameState.currentPlayer}`] = Date.now();
+            gameTimer = setInterval(updateTimers, 1000);
         }
 
         function resetTimers() {
-            clearInterval(gameState.gameTimer);
-            clearInterval(gameState.playerTimersInterval);
-            gameState.gameTimer = null;
+            clearInterval(gameTimer);
             gameState.gameStartTime = 0;
             ['p1', 'p2'].forEach(p => {
                 gameState.playerStartTimes[p] = 0;
@@ -441,11 +389,13 @@
             gameState.currentPlayer = 1;
             gameState.matchedCards.clear();
             resetTimers();
-            createBoard();
+            
+            createFullBoard();
+            
             updateStats();
             document.body.className = 'player1-bg';
-            showMessage('🎮 Igra počinje! Igrač 1 na potezu!');
-            startGameTimer();
+            showMessage('🎮 Sve 28 kartica spremne! Počni uparivati!');
+            startTimers();
         }
 
         function resetGame() {
@@ -459,50 +409,11 @@
             resetGame();
         }
 
-        function filterByRow(event, row) {
-            document.querySelectorAll('.row-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            gameState.selectedRow = row;
-            resetGame();
-        }
-
-        function getAvailableCards() {
-            return allCards.filter(card => !gameState.matchedCards.has(card.imageKey));
-        }
-
-        function createBoard() {
-            const availableCards = getAvailableCards();
+        function createFullBoard() {
             const board = document.getElementById('gameBoard');
             board.innerHTML = '';
 
-            const groupMap = {};
-            availableCards.forEach(card => {
-                if (!groupMap[card.group]) groupMap[card.group] = [];
-                groupMap[card.group].push(card);
-            });
-
-            const groups = Object.keys(groupMap);
-            const selectedGroups = [];
-            
-            // Odaberi tačno 'difficulty' grupa
-            for (let i = 0; i < gameState.difficulty; i++) {
-                if (groups.length === 0) break;
-                const randIndex = Math.floor(Math.random() * groups.length);
-                const groupName = groups.splice(randIndex, 1)[0];
-                selectedGroups.push(groupMap[groupName]);
-            }
-
-            currentGameCards = [];
-            selectedGroups.forEach(group => {
-                // Uzmi SVE dostupne kartice iz grupe (max 4)
-                const cardsToUse = group.slice(0, gameState.difficulty);
-                currentGameCards.push(...cardsToUse);
-            });
-
-            // Mešaj PERFEKTNO
-            currentGameCards.sort(() => Math.random() - 0.5);
-
-            currentGameCards.forEach((cardData, index) => {
+            allCards.forEach((cardData, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.dataset.index = index;
@@ -510,14 +421,15 @@
                 
                 const back = document.createElement('div');
                 back.className = 'card-back';
-                back.textContent = '❓';
+                back.innerHTML = '';
                 
                 card.appendChild(back);
                 card.addEventListener('click', () => flipCard(index));
                 board.appendChild(card);
             });
 
-            console.log(`🎲 Kreirano ${currentGameCards.length} kartica za uparivanje`);
+            currentGameCards = [...allCards];
+            console.log('✅ PRIKAZANO 28/28 KARATICA');
         }
 
         function flipCard(index) {
@@ -529,15 +441,19 @@
             if (cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
 
             const imgUrl = baseGit + currentGameCards[index].imageKey;
-            cardEl.innerHTML = `<img src="${imgUrl}" alt="kartica" class="card-front" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+❌</RGV4ZD4='>`;
+            cardEl.innerHTML = `<div class="card-front"><img src="${imgUrl}" alt="kartica" onerror="handleImageError(this, '${currentGameCards[index].imageKey}')"></div>`;
             cardEl.classList.add('flipped');
             
             gameState.flippedCards.push({ index, group: currentGameCards[index].group });
-            startPlayerTimer();
 
             if (gameState.flippedCards.length === gameState.difficulty) {
                 setTimeout(checkMatch, 1200);
             }
+        }
+
+        function handleImageError(img, imageKey) {
+            console.warn(`❌ Slika nedostaje: ${imageKey}`);
+            img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZkZGRmIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCI+🚫PC90ZXh0Pjwvc3ZnPg==';
         }
 
         function checkMatch() {
@@ -552,26 +468,32 @@
                 } else {
                     cardEl.classList.add('error');
                     setTimeout(() => {
-                        cardEl.innerHTML = '<div class="card-back">❓</div>';
+                        cardEl.innerHTML = '<div class="card-back"></div>';
                         cardEl.classList.remove('flipped', 'error');
-                    }, 500);
+                    }, 600);
                 }
             });
 
             if (allMatch) {
                 gameState.matchesFound[`p${gameState.currentPlayer}`]++;
                 updateStats();
-                showMessage(`✅ Igrač ${gameState.currentPlayer} upario! +1 poen`);
+                showMessage(`✅ Igrač ${gameState.currentPlayer} upario! +1`);
 
-                if (gameState.matchedCards.size + gameState.difficulty >= allCards.length) {
-                    setTimeout(endGame, 1500);
+                const matchedCount = currentGameCards.filter(c => c.matched).length;
+                if (matchedCount >= 28) {
+                    setTimeout(() => {
+                        const p1 = gameState.matchesFound.p1;
+                        const p2 = gameState.matchesFound.p2;
+                        showMessage(p1 > p2 ? '🏆 IGRAČ 1 POBEĐUJE!' : 
+                                  p2 > p1 ? '🏆 IGRAČ 2 POBEĐUJE!' : '🤝 NEROŠENO!');
+                    }, 1500);
+                    gameState.gameActive = false;
                     return;
                 }
 
                 switchPlayer();
-                setTimeout(createBoard, 1800);
             } else {
-                showMessage('❌ Pogrešan upar! Smijeni igrača', true);
+                showMessage('❌ Pogrešan upar! **Smijeni igrača**', true);
                 switchPlayer();
             }
 
@@ -581,22 +503,9 @@
         function switchPlayer() {
             gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
             document.body.className = `player${gameState.currentPlayer}-bg`;
+            gameState.playerStartTimes[`p${gameState.currentPlayer}`] = Date.now();
             updateStats();
             showMessage(`🔄 Red igrača ${gameState.currentPlayer}!`);
-        }
-
-        function endGame() {
-            gameState.gameActive = false;
-            const p1Score = gameState.matchesFound.p1;
-            const p2Score = gameState.matchesFound.p2;
-            
-            if (p1Score > p2Score) {
-                showMessage('🏆 IGRAČ 1 POBJEĐUJE! 🏆');
-            } else if (p2Score > p1Score) {
-                showMessage('🏆 IGRAČ 2 POBJEĐUJE! 🏆');
-            } else {
-                showMessage('🤝 NEROŠENO! 👏');
-            }
         }
 
         function updateStats() {
@@ -608,26 +517,25 @@
 
         function showMessage(text, isError = false) {
             const el = document.getElementById('message');
-            el.textContent = text;
+            el.innerHTML = text;
             el.className = isError ? 'message error' : 'message';
         }
 
         function toggleHint() {
             document.querySelectorAll('.card:not(.matched)').forEach((card, index) => {
                 if (card.classList.contains('hint-active')) {
-                    card.innerHTML = '<div class="card-back">❓</div>';
+                    card.innerHTML = '<div class="card-back"></div>';
                     card.classList.remove('hint-active', 'flipped');
                 } else {
                     const imgUrl = baseGit + currentGameCards[index].imageKey;
-                    card.innerHTML = `<img src="${imgUrl}" alt="hint" class="card-front" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+👀PC90ZXh0Pjwvc3ZnPg=='">`;
+                    card.innerHTML = `<div class="card-front"><img src="${imgUrl}" alt="hint" onerror="handleImageError(this, '${currentGameCards[index].imageKey}')"></div>`;
                     card.classList.add('hint-active', 'flipped');
                 }
             });
         }
 
-        // 🚀 START - sve radi savršeno
         window.addEventListener('load', () => {
-            gameState.playerTimersInterval = setInterval(updateTimers, 1000);
+            setInterval(updateTimers, 1000);
             initGame();
         });
     </script>
