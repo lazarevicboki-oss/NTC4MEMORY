@@ -285,8 +285,7 @@
         <div class="game-board" id="gameBoard"></div>
 
         <div class="info">
-            🧠 **28 kartica spremnih** | ⏱️ Vremensko praćenje | 
-            🎯 Automatski upari | 👆 Klikni za okretanje
+            ⏱️ Vremensko praćenje | 🎯 Automatski upari | 👆 Klikni za okretanje
         </div>
     </div>
 
@@ -339,10 +338,10 @@
             difficulty: 2,
             matchedCards: new Set(),
             gameStartTime: 0,
-            playerStartTimes: { p1: 0, p2: 0 }
+            playerStartTimes: { p1: 0, p2: 0 },
+            displayedCards: []
         };
 
-        let currentGameCards = [];
         let gameTimer = null;
 
         function formatTime(seconds) {
@@ -388,13 +387,15 @@
             gameState.matchesFound = { p1: 0, p2: 0 };
             gameState.currentPlayer = 1;
             gameState.matchedCards.clear();
+            gameState.displayedCards = [];
             resetTimers();
             
-            createFullBoard();
+            // ✅ NASUMICNO RASPODJELJENE 28 KARATICA
+            createShuffledBoard();
             
             updateStats();
             document.body.className = 'player1-bg';
-            showMessage('🎮 Sve 28 kartica spremne! Počni uparivati!');
+            showMessage('🎮 Igra počinje! Igrač 1 na potezu - okreći ' + gameState.difficulty + ' kartica!');
             startTimers();
         }
 
@@ -409,11 +410,16 @@
             resetGame();
         }
 
-        function createFullBoard() {
+        // ✅ NASUMICNO RASPORREDUJE SVE 28 KARATICA PRI SVAKOJ NOVOJ IGRI
+        function createShuffledBoard() {
             const board = document.getElementById('gameBoard');
             board.innerHTML = '';
 
-            allCards.forEach((cardData, index) => {
+            // MEŠAJ SVE 28 KARATICA
+            const shuffledCards = [...allCards].sort(() => Math.random() - 0.5);
+            gameState.displayedCards = shuffledCards;
+
+            shuffledCards.forEach((cardData, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.dataset.index = index;
@@ -428,23 +434,25 @@
                 board.appendChild(card);
             });
 
-            currentGameCards = [...allCards];
-            console.log('✅ PRIKAZANO 28/28 KARATICA');
+            console.log('✅ NASUMICNO RASPORIEDJENO 28/28 KARATICA');
         }
 
         function flipCard(index) {
             if (!gameState.gameActive || 
                 gameState.flippedCards.length >= gameState.difficulty ||
-                currentGameCards[index].matched) return;
+                gameState.displayedCards[index].matched) return;
 
             const cardEl = document.querySelector(`[data-index="${index}"]`);
             if (cardEl.classList.contains('flipped') || cardEl.classList.contains('matched')) return;
 
-            const imgUrl = baseGit + currentGameCards[index].imageKey;
-            cardEl.innerHTML = `<div class="card-front"><img src="${imgUrl}" alt="kartica" onerror="handleImageError(this, '${currentGameCards[index].imageKey}')"></div>`;
+            const imgUrl = baseGit + gameState.displayedCards[index].imageKey;
+            cardEl.innerHTML = `<div class="card-front"><img src="${imgUrl}" alt="kartica" onerror="handleImageError(this, '${gameState.displayedCards[index].imageKey}')"></div>`;
             cardEl.classList.add('flipped');
             
-            gameState.flippedCards.push({ index, group: currentGameCards[index].group });
+            gameState.flippedCards.push({ 
+                index, 
+                group: gameState.displayedCards[index].group 
+            });
 
             if (gameState.flippedCards.length === gameState.difficulty) {
                 setTimeout(checkMatch, 1200);
@@ -464,7 +472,8 @@
                 const cardEl = document.querySelector(`[data-index="${index}"]`);
                 if (allMatch) {
                     cardEl.classList.add('matched');
-                    currentGameCards[index].matched = true;
+                    gameState.displayedCards[index].matched = true;
+                    gameState.matchedCards.add(gameState.displayedCards[index].imageKey);
                 } else {
                     cardEl.classList.add('error');
                     setTimeout(() => {
@@ -479,7 +488,7 @@
                 updateStats();
                 showMessage(`✅ Igrač ${gameState.currentPlayer} upario! +1`);
 
-                const matchedCount = currentGameCards.filter(c => c.matched).length;
+                const matchedCount = Array.from(gameState.matchedCards).length;
                 if (matchedCount >= 28) {
                     setTimeout(() => {
                         const p1 = gameState.matchesFound.p1;
@@ -491,9 +500,21 @@
                     return;
                 }
 
-                switchPlayer();
+                // ✅ JEDAN IGRAČ OKREĆE DOK NE POKRNEĆE, ONDA SLEDEĆI
+                const currentPlayerMatches = gameState.matchesFound[`p${gameState.currentPlayer}`];
+                const playerCardsLeft = gameState.displayedCards.filter(c => 
+                    c.group === gameState.displayedCards[gameState.flippedCards[0].index].group && 
+                    !c.matched
+                ).length;
+
+                if (playerCardsLeft < gameState.difficulty) {
+                    // Nema više kartica u grupi - smijeni igrača
+                    switchPlayer();
+                }
+                // Inače - isti igrač nastavlja
+
             } else {
-                showMessage('❌ Pogrešan upar! **Smijeni igrača**', true);
+                showMessage('❌ Pogrešan upar! Smijeni igrača', true);
                 switchPlayer();
             }
 
@@ -527,8 +548,8 @@
                     card.innerHTML = '<div class="card-back"></div>';
                     card.classList.remove('hint-active', 'flipped');
                 } else {
-                    const imgUrl = baseGit + currentGameCards[index].imageKey;
-                    card.innerHTML = `<div class="card-front"><img src="${imgUrl}" alt="hint" onerror="handleImageError(this, '${currentGameCards[index].imageKey}')"></div>`;
+                    const imgUrl = baseGit + gameState.displayedCards[index].imageKey;
+                    card.innerHTML = `<div class="card-front"><img src="${imgUrl}" alt="hint" onerror="handleImageError(this, '${gameState.displayedCards[index].imageKey}')"></div>`;
                     card.classList.add('hint-active', 'flipped');
                 }
             });
