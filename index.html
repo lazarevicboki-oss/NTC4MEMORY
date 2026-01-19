@@ -104,8 +104,6 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             transition: all 0.3s ease;
-            background-size: 400% 700%;
-            background-repeat: no-repeat;
         }
 
         .card:hover:not(.matched):not(.flipped) {
@@ -141,8 +139,8 @@
             font-size: 32px;
             color: white;
             font-weight: bold;
-            /* slika pozadine za sve kartice */
-            background-image: url('./NTCback.png');
+            /* SLika pozadine za sve kartice - ISPRAVLJENO */
+            background-image: url('https://raw.githubusercontent.com/lazarevicboki-oss/NTC4MEMORY/main/Background.png');
             background-size: cover;
             background-position: center;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
@@ -333,51 +331,54 @@
         <div class="game-board" id="gameBoard"></div>
 
         <div class="info">
-            Upari kartice iz iste SI vrste. Odaberi 2, 3 ili 4 kartice odjednom. Sve kartice koriste slike iz tvog GitHub repozitorijuma!
+            Upari kartice iz iste SI vrste. Odaberi 2, 3 ili 4 kartice odjednom. Sve slike se povlače iz tvog GitHub repozitorijuma!
         </div>
     </div>
 
     <script>
-        // slike su u istom folderu kao index.html
-        const baseGit = "./";
+        // ISPRAVLJENO: Raw GitHub URL-ovi umesto relative putanje
+        const baseGit = 'https://raw.githubusercontent.com/lazarevicboki-oss/NTC4MEMORY/main/';
 
         const cardImages = {
             // Row 1: Mass
-            'm': baseGit + "m.png",
-            'kg': baseGit + "kg.png",
-            'sumo': baseGit + "sumo.png",
-            'mal': baseGit + "teg.png",
+            'm': baseGit + 'm.png',
+            'kg': baseGit + 'kg.png',
+            'sumo': baseGit + 'sumo.png',
+            'mal': baseGit + 'teg.png',
             // Row 2: Length
-            'l': baseGit + "l.png",
-            'meter': baseGit + "meter.png",
-            'road': baseGit + "road.png",
-            'mtape': baseGit + "mtape.png",
+            'l': baseGit + 'l.png',
+            'meter': baseGit + 'meter.png',
+            'road': baseGit + 'road.png',
+            'mtape': baseGit + 'mtape.png',
             // Row 3: Current
-            'I': baseGit + "I.png",
-            'A': baseGit + "A.png",
-            'struja': baseGit + "struja.png",
-            'AA': baseGit + "AA.png",
+            'I': baseGit + 'I.png',
+            'A': baseGit + 'A.png',
+            'struja': baseGit + 'struja.png',
+            'AA': baseGit + 'AA.png',
             // Row 4: Time
-            't': baseGit + "t.png",
-            's': baseGit + "s.png",
-            'sat': baseGit + "sat.png",
-            'satp': baseGit + "satp.png",
+            't': baseGit + 't.png',
+            's': baseGit + 's.png',
+            'sat': baseGit + 'sat.png',
+            'satp': baseGit + 'satp.png',
             // Row 5: Temperature
-            'T': baseGit + "T1.png",
-            'K': baseGit + "K.png",
-            'temp1': baseGit + "temp1.png",
-            'temp2': baseGit + "temp2.png",
+            'T': baseGit + 'T1.png',
+            'K': baseGit + 'K.png',
+            'temp1': baseGit + 'temp1.png',
+            'temp2': baseGit + 'temp2.png',
             // Row 6: Amount of Substance
-            'n': baseGit + "n.png",
-            'mal2': baseGit + "mal.png",
-            'atom': baseGit + "atom.png",
-            'elenmajer': baseGit + "elenmajer.png",
+            'n': baseGit + 'n.png',
+            'mal2': baseGit + 'mal.png',
+            'atom': baseGit + 'atom.png',
+            'elenmajer': baseGit + 'elenmajer.png',
             // Row 7: Luminous Intensity
-            'J': baseGit + "J.png",
-            'cd': baseGit + "cd.png",
-            'candel': baseGit + "candel.png",
-            'lamp': baseGit + "lamp.png"
+            'J': baseGit + 'J.png',
+            'cd': baseGit + 'cd.png',
+            'candel': baseGit + 'candel.png',
+            'lamp': baseGit + 'lamp.png'
         };
+
+        // Dodaj Background.png u cardImages za pozadinu (već korišćeno u CSS)
+        cardImages['background'] = baseGit + 'Background.png';
 
         const cards = [
             // Row 1: Mass
@@ -407,4 +408,279 @@
             { name: 'Temp2', group: 'temperature', row: 5, imageKey: 'temp2' },
             // Row 6: Amount of Substance
             { name: 'n', group: 'amount', row: 6, imageKey: 'n' },
-            { name: '[mol]', group: 'amount', row: 6, image
+            { name: '[mol]', group: 'amount', row: 6, imageKey: 'mal2' },
+            { name: 'Atom', group: 'amount', row: 6, imageKey: 'atom' },
+            { name: 'Elenmajer', group: 'amount', row: 6, imageKey: 'elenmajer' },
+            // Row 7: Luminous Intensity
+            { name: 'J', group: 'intensity', row: 7, imageKey: 'J' },
+            { name: '[cd]', group: 'intensity', row: 7, imageKey: 'cd' },
+            { name: 'Candel', group: 'intensity', row: 7, imageKey: 'candel' },
+            { name: 'Lamp', group: 'intensity', row: 7, imageKey: 'lamp' }
+        ];
+
+        let gameState = {
+            flippedCards: [],
+            matchesFound: { p1: 0, p2: 0 },
+            currentPlayer: 1,
+            gameActive: false,
+            difficulty: 2,
+            selectedRow: 0,
+            startTime: { p1: 0, p2: 0 },
+            timers: { p1: null, p2: null },
+            p1TimeElapsed: 0,
+            p2TimeElapsed: 0
+        };
+
+        let allCards = [...cards];
+        let currentCards = [];
+
+        function initGame() {
+            gameState.gameActive = true;
+            gameState.flippedCards = [];
+            resetTimers();
+            createBoard();
+            updateStats();
+            showMessage('');
+        }
+
+        function resetGame() {
+            gameState = {
+                flippedCards: [],
+                matchesFound: { p1: 0, p2: 0 },
+                currentPlayer: 1,
+                gameActive: false,
+                difficulty: 2,
+                selectedRow: 0,
+                startTime: { p1: 0, p2: 0 },
+                timers: { p1: null, p2: null },
+                p1TimeElapsed: 0,
+                p2TimeElapsed: 0
+            };
+            document.body.className = 'player1-bg';
+            initGame();
+        }
+
+        function setDifficulty(event, level, matches) {
+            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            gameState.difficulty = matches;
+            resetGame();
+        }
+
+        function filterByRow(event, row) {
+            document.querySelectorAll('.row-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            gameState.selectedRow = row;
+            resetGame();
+        }
+
+        function getFilteredCards() {
+            if (gameState.selectedRow === 0) return allCards;
+            return allCards.filter(card => card.row === gameState.selectedRow);
+        }
+
+        function createBoard() {
+            const filteredCards = getFilteredCards();
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+
+            // Kreiraj više kopija za kompleksnije uparivanje
+            const gameCards = [];
+            const groupCount = Math.ceil(gameState.difficulty * 2);
+            
+            filteredCards.forEach(card => {
+                for (let i = 0; i < groupCount; i++) {
+                    gameCards.push({ ...card });
+                }
+            });
+
+            // Mešaj kartice
+            currentCards = gameCards.sort(() => Math.random() - 0.5).slice(0, gameState.difficulty * 4);
+
+            currentCards.forEach((cardData, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.index = index;
+                card.dataset.group = cardData.group;
+                card.dataset.name = cardData.name;
+                
+                const back = document.createElement('div');
+                back.className = 'card-back';
+                back.textContent = '?';
+                
+                card.appendChild(back);
+                card.addEventListener('click', () => flipCard(index));
+                
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard(index) {
+            if (!gameState.gameActive || gameState.flippedCards.length >= gameState.difficulty) return;
+
+            const card = document.querySelector(`[data-index="${index}"]`);
+            if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+            const imageUrl = cardImages[currentCards[index].imageKey];
+            
+            card.innerHTML = `
+                <img src="${imageUrl}" alt="${currentCards[index].name}" style="width: 80%; height: 80%; object-fit: contain;">
+                <div style="position: absolute; bottom: 8px; right: 8px; font-size: 12px; font-weight: bold;">${currentCards[index].name}</div>
+            `;
+            
+            card.classList.add('flipped');
+            gameState.flippedCards.push({ index, group: currentCards[index].group });
+
+            startPlayerTimer();
+
+            if (gameState.flippedCards.length === gameState.difficulty) {
+                setTimeout(checkMatch, 1000);
+            }
+        }
+
+        function checkMatch() {
+            const groups = gameState.flippedCards.map(c => c.group);
+            const allMatch = groups.every(g => g === groups[0]);
+
+            gameState.flippedCards.forEach(({ index }) => {
+                const card = document.querySelector(`[data-index="${index}"]`);
+                if (allMatch) {
+                    card.classList.add('matched');
+                } else {
+                    card.classList.add('error');
+                    setTimeout(() => {
+                        card.innerHTML = `
+                            <div class="card-back">?</div>
+                        `;
+                        card.classList.remove('flipped', 'error');
+                    }, 400);
+                }
+            });
+
+            if (allMatch) {
+                gameState.matchesFound[`p${gameState.currentPlayer}`]++;
+                updateStats();
+                showMessage(`Odličan upar! Igrač ${gameState.currentPlayer} dobija poen! 🎉`);
+                
+                // Proveri kraj igre
+                const totalMatches = currentCards.length / gameState.difficulty;
+                if (gameState.matchesFound[`p${gameState.currentPlayer}`] >= totalMatches) {
+                    showMessage(`🎊 Igrač ${gameState.currentPlayer} POBEĐUJE! 🎊`);
+                    gameState.gameActive = false;
+                    stopAllTimers();
+                    return;
+                }
+
+                switchPlayer();
+                setTimeout(() => {
+                    createNewSet();
+                }, 1500);
+            } else {
+                showMessage('Pokušaj ponovo!', true);
+                switchPlayer();
+            }
+
+            gameState.flippedCards = [];
+        }
+
+        function createNewSet() {
+            const remainingCards = currentCards.filter((_, i) => 
+                !document.querySelector(`[data-index="${i}"]`).classList.contains('matched')
+            );
+            
+            if (remainingCards.length === 0) {
+                createBoard();
+            } else {
+                // Kreiraj novi set od preostalih
+                const newSet = [];
+                const needed = gameState.difficulty;
+                const groups = {};
+                
+                remainingCards.forEach(card => {
+                    if (!groups[card.group]) groups[card.group] = [];
+                    groups[card.group].push(card);
+                });
+
+                Object.values(groups).forEach(groupCards => {
+                    if (newSet.length < needed * 4) {
+                        newSet.push(...groupCards.slice(0, gameState.difficulty));
+                    }
+                });
+
+                currentCards = newSet.sort(() => Math.random() - 0.5);
+                createBoard();
+            }
+        }
+
+        function switchPlayer() {
+            gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+            document.body.className = gameState.currentPlayer === 1 ? 'player1-bg' : 'player2-bg';
+            updateStats();
+            showMessage(`Sada je red Igrača ${gameState.currentPlayer}!`);
+        }
+
+        function startPlayerTimer() {
+            const player = `p${gameState.currentPlayer}`;
+            if (!gameState.startTime[player]) {
+                gameState.startTime[player] = Date.now();
+                gameState.timers[player] = setInterval(() => {
+                    updatePlayerTime(player);
+                }, 1000);
+            }
+        }
+
+        function updatePlayerTime(player) {
+            const elapsed = Math.floor((Date.now() - gameState.startTime[player]) / 1000);
+            document.getElementById(`${player}Time`).textContent = `${elapsed}s`;
+        }
+
+        function resetTimers() {
+            Object.keys(gameState.timers).forEach(p => {
+                if (gameState.timers[p]) {
+                    clearInterval(gameState.timers[p]);
+                    gameState.timers[p] = null;
+                }
+            });
+            document.getElementById('p1Time').textContent = '0s';
+            document.getElementById('p2Time').textContent = '0s';
+        }
+
+        function stopAllTimers() {
+            resetTimers();
+        }
+
+        function updateStats() {
+            document.getElementById('p1Matches').textContent = gameState.matchesFound.p1;
+            document.getElementById('p2Matches').textContent = gameState.matchesFound.p2;
+            document.getElementById('currentPlayer').textContent = `Igrač ${gameState.currentPlayer}`;
+        }
+
+        function showMessage(text, isError = false) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = isError ? 'message error' : 'message';
+        }
+
+        function toggleHint() {
+            const cards = document.querySelectorAll('.card:not(.matched):not(.flipped)');
+            cards.forEach(card => {
+                if (card.classList.contains('hint-shown')) {
+                    card.innerHTML = '<div class="card-back">?</div>';
+                    card.classList.remove('hint-shown');
+                } else {
+                    const index = parseInt(card.dataset.index);
+                    const imageUrl = cardImages[currentCards[index].imageKey];
+                    card.innerHTML = `
+                        <img src="${imageUrl}" alt="${currentCards[index].name}" style="width: 80%; height: 80%; object-fit: contain;">
+                        <div style="position: absolute; bottom: 8px; right: 8px; font-size: 12px; font-weight: bold;">${currentCards[index].name}</div>
+                    `;
+                    card.classList.add('hint-shown');
+                }
+            });
+        }
+
+        // Pokreni igru
+        initGame();
+    </script>
+</body>
+</html>
